@@ -1,12 +1,5 @@
-﻿
-using neetcode.DataStructures;
-using System.Collections.Specialized;
-using System.ComponentModel.DataAnnotations;
-using System.Net.NetworkInformation;
-using System.Net.Security;
-using System.Net.WebSockets;
-using System.Reflection;
-using System.Text;
+﻿using System.Text;
+using neetcode.Leet75;
 
 namespace neetcode;
 public class LeetCode75
@@ -440,6 +433,8 @@ public class LeetCode75
 
     }
 
+    #region Hash map / Set
+
     public IList<IList<int>> FindDifference(int[] nums1, int[] nums2)
     {
         var n1 = nums1.ToHashSet();
@@ -488,14 +483,60 @@ public class LeetCode75
         return dict.Count == dict.Values.ToHashSet().Count;
     }
 
-    //public bool CloseStrings(string word1, string word2)
-    //{
-    //    if (word1.Length != word2.Length)
-    //        return false;
+    public bool CloseStrings(string word1, string word2)
+    {
+        if (word1.Length != word2.Length)
+            return false;
 
+        var dict1 = new Dictionary<char, int>();
+        foreach (var c in word1)
+        {
+            if (dict1.TryAdd(c, 1) is false)
+            {
+                dict1[c] += 1;
+            }
+        }
+        
+        var dict2 = new Dictionary<char, int>();
+        foreach (var c in word2)
+        {
+            if (dict2.TryAdd(c, 1) is false)
+            {
+                dict2[c] += 1;
+            }
+        }
 
+        var sameCharCounts = dict1.All(it =>
+        {
+            if (dict2.TryGetValue(it.Key, out var c2))
+            {
+                var c1 = it.Value;
+                return c1 == c2;
+            }
+            return false;
+        });
 
-    //}
+        if (sameCharCounts)
+        {
+            return true;
+        }
+
+        if (dict1.All(it => dict2.ContainsKey(it.Key)) is false)
+        {
+            return false;
+        }
+        
+        var order1 = dict1
+            .OrderBy(it => it.Value)
+            .Select((pair, index)=>(pair, index))
+            .ToList();
+        
+        var order2 = dict2
+            .OrderBy(it => it.Value)
+            .ToList();
+
+        return  order1.All(it => order2[it.index].Value == it.pair.Value);
+    }
 
     public int EqualPairs(int[][] grid)
     {
@@ -530,6 +571,9 @@ public class LeetCode75
         return equal;
     }
 
+    #endregion
+
+    #region Stack
     public string RemoveStars(string s)
     {
         var stack = new Stack<char>();
@@ -648,49 +692,40 @@ public class LeetCode75
 
         return string.Empty;
     }
+    #endregion
 
-    public string PredictPartyVictory2(string senate)
+    #region Queue
+
+    public class RecentCounter
     {
-        var queue = new Queue<char>();
-        var (rCount, dCount) = senate.Aggregate((R: 0, D: 0), (acc, curr) =>
+        public Queue<int> Counter { get; init; }
+        
+        public RecentCounter()
         {
-            queue.Enqueue(curr);
-            return curr switch
-            {
-                'R' => (acc.R + 1, acc.D),
-                _ => (acc.R, acc.D + 1)
-            };
-        });
-
-        var scale = 0;
-
-        while (rCount > 0 && dCount > 0)
-        {
-            var senator = queue.Dequeue();
-            if (senator == 'R')
-            {
-                if (scale >= 0)
-                {
-                    dCount--;
-                    queue.Enqueue(senator);
-                }
-                scale++;
-            }
-            else
-            {
-
-                if (scale <= 0)
-                {
-                    rCount--;
-                    queue.Enqueue(senator);
-                }
-                scale--;
-            }
+            Counter = new Queue<int>();
         }
+    
+        public int Ping(int t)
+        {
+            Counter.Enqueue(t);
+            var range = t - 3000;
 
-        return rCount > dCount ? "Radiant" : "Dire";
+            while (Counter.TryPeek(out var time))
+            {
+                if (time < range)
+                {
+                    Counter.Dequeue();
+                }
+                else
+                {
+                    break;
+                }
+            }
+            
+            return Counter.Count;
+        }
     }
-
+    
     public string PredictPartyVictory(string senate)
     {
         var queue = new Queue<char>();
@@ -756,6 +791,11 @@ public class LeetCode75
         }
     }
 
+
+    #endregion
+
+    #region Linked List
+
     public class ListNode
     {
         public int val;
@@ -765,38 +805,6 @@ public class LeetCode75
             this.val = val;
             this.next = next;
         }
-    }
-
-    public ListNode DeleteMiddle(ListNode head)
-    {
-        if (head is null or { next: null })
-            return null;
-
-        var count = 0;
-
-        var node = head;
-        while (node is not null)
-        {
-            count++;
-            node = node.next;
-        }
-        var middle = count / 2;
-        node = head;
-
-        var curr = 0;
-        while (node is not null)
-        {
-
-            if (curr + 1 == middle)
-            {
-                node.next = node.next.next;
-            }
-
-            curr++;
-            node = node.next;
-        }
-
-        return head;
     }
 
     public ListNode DeleteMiddle2(ListNode head)
@@ -866,30 +874,6 @@ public class LeetCode75
         return aux;
     }
 
-    public int PairSum(ListNode head)
-    {
-        var node = head;
-        var list = new List<int>();
-        while (node is not null)
-        {
-            list.Add(node.val);
-            node = node.next;
-        }
-
-        var max = 0;
-        for (int i = 0; i < list.Count; i++)
-        {
-            if (i % 2 == 0)
-            {
-                var j = list.Count - 1 - i;
-                max = Math.Max(list[j] + list[i], max);
-
-            }
-        }
-
-        return max;
-    }
-
     public int PairSum2(ListNode head)
     {
         var slow = head;
@@ -914,19 +898,9 @@ public class LeetCode75
 
         return max;
     }
+    #endregion
 
-    public class TreeNode
-    {
-        public int val;
-        public TreeNode left;
-        public TreeNode right;
-        public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
-        {
-            this.val = val;
-            this.left = left;
-            this.right = right;
-        }
-    }
+    #region Binary Tree - DFS
 
     public int MaxDepth(TreeNode root)
     {
@@ -1068,7 +1042,10 @@ public class LeetCode75
         DFS(root, p, q, ref awnser);
         return awnser;
     }
-
+    #endregion
+    
+    #region Binary Tree - BFS
+    
     public IList<int> RightSideView(TreeNode root)
     {
         var dict = new Dictionary<int, int>();
@@ -1114,7 +1091,9 @@ public class LeetCode75
         return dict.MaxBy(it => it.Value).Key;
 
     }
-
+    #endregion
+    
+    #region Binary Search Tree 
     public TreeNode SearchBST(TreeNode root, int val)
     {
         if (root is null)
@@ -1136,56 +1115,72 @@ public class LeetCode75
         return node;
     }
 
-    public TreeNode DeleteNode(TreeNode root, int key)
+    public TreeNode? DeleteNode(TreeNode? root, int key)
     {
         if (root is null)
             return root;
 
         if (root.val == key)
         {
-            var newNode = root switch
-            {
-                { left: null, right: null } => null,
-                { left: null, right: not null } => root.right,
-                { left: not null, right: null } => root.left,
-                var x => highest(x.left),
-            };
-            newNode.right = root.right;
-            newNode.left = root.left;
-            root = newNode;
+            return root;
+        }
 
-        }
-        else if (root.val < key)
+        var direction = root.val > key ? root.left : root.right;
+        
+        var node = DeleteNode(direction, key);
+
+        if (node is null)
         {
-            var node = DeleteNode(root.right, key);
-            if (node is not null)
-            {
-                root.right = node;
-            }
+            return null;
         }
-        else
-        {
-            var node = DeleteNode(root.left, key);
-            if (node is not null)
-            {
-                root.left = node;
-            }
-        }
+
+        DeleteNode(root, node,root.val > key);
 
         return root;
     }
-    public TreeNode? highest(TreeNode? node)
+
+    public void DeleteNode(TreeNode root, TreeNode nodeToDelete, bool isLeft)
     {
-        if (node is null or { right: null, left: null })
+    
+        if (nodeToDelete is { left: null, right: null })
         {
-            return node;
+            if (isLeft)
+            {
+                root.left = null;
+                return;
+            }
+            
+            root.right = null;
+        }
+        
+        if (nodeToDelete is { left: null, right: not null })
+        {
+            if (isLeft)
+            {
+                root.left = nodeToDelete.right;
+                return;
+            }
+            
+            root.right = nodeToDelete.right;
+        }
+        
+        if (nodeToDelete is { left:not null, right: null })
+        {
+            if (isLeft)
+            {
+                root.left = nodeToDelete.left;
+                return;
+            }
+            
+            root.right = nodeToDelete.left;
         }
 
-        TreeNode? newNOde = null;
-        newNOde = highest(node.right);
-        return newNOde is null ? highest(node.left) : newNOde;
+        DeleteNode(nodeToDelete, nodeToDelete.left, true);
     }
 
+    #endregion
+    
+    #region Graphs - DFS
     public bool CanVisitAllRooms(IList<IList<int>> rooms)
     {
         var queue = new Queue<IList<int>>();
@@ -1207,7 +1202,7 @@ public class LeetCode75
 
         return rooms.Count == keys.Count;
     }
-
+    
     public int FindCircleNum(int[][] isConnected)
     {
         var queue = new Queue<int[]>();
@@ -1240,7 +1235,7 @@ public class LeetCode75
 
         return provinces;
     }
-
+    
     class MinNode
     {
         public int Val { get; set; }
@@ -1305,109 +1300,290 @@ public class LeetCode75
         return a;
     }
 
+    #endregion
+    
+    #region Graphs - BFS
+    
     public int NearestExit(char[][] maze, int[] entrance)
     {
-        var queue = new Queue<int[]>();
-        var viseted = new HashSet<(int x, int y)>();
-        var parent = new Dictionary<(int x, int y), (int x, int y)>();
+        var solution = new Leet75.Solution(maze);
+        return solution.NearestExit(entrance);
+    }
 
-        queue.Enqueue(entrance);
+    public int OrangesRotting(int[][] grid)
+    {
+        const int fresh = 1;
+        const int rotten = 2;
+        var visited = new bool[grid.Length, grid[0].Length];
+        var directions = new int[][] { [1, 0], [-1, 0], [0, 1], [0, -1] };
+        var queue = new Queue<(int, int, int)>();
 
-        var directions = new int[][]
+        var orangeCount = 0;
+        var rottenOranges = 0;
+
+        for (int i = 0; i < grid.Length; i++)
         {
-            [-1,0],
-            [1,0],
-            [0,-1],
-            [0,1],
-        };
-
-        var lastPosition = (0, 0);
-        while (queue.TryDequeue(out var position))
-        {
-            //Console.Clear();
-            var (x, y) = (position[0], position[1]);
-
-            if (IsInsideBoundaries(maze, x, y) is false)
+            for (int j = 0; j < grid[i].Length; j++)
             {
-                lastPosition = (x, y);
-                break;
-            }
-
-            viseted.Add((x, y));
-            //PrintBoard(maze, viseted, entrance);
-
-            var positions = directions
-                .Select(it => (x + it[0], y + it[1]))
-                .Where(it =>
+                var cell = grid[i][j];
+                if (cell is fresh or rotten)
                 {
-                    if (viseted.Contains((it.Item1, it.Item2)) is false)
-                    {
-                        var isInside = IsInsideBoundaries(maze, it.Item1, it.Item2);
-                        if (isInside)
-                        {
-                            var value = maze[it.Item1][it.Item2];
-                            if (value == '.')
-                            {
-                                return true;
-                            }
-                        }
-
-                        var currIsntEntrance = (x == entrance[0] && y == entrance[1]) is false;
-
-                        if (isInside is false && currIsntEntrance)
-                        {
-                            return true;
-                        }
-                    }
-                    return false;
+                    orangeCount++;
                 }
-                );
 
-            foreach (var (nextX, nextY) in positions)
-            {
-                parent.TryAdd((nextX, nextY), (x, y));
-                queue.Enqueue([nextX, nextY]);
-            }
-        }
-
-
-        return parent.Count == 0 || lastPosition ==(0,0) ? -1 : CountSteps(parent, (entrance[0], entrance[1]), lastPosition, 0);
-
-    }
-
-    public void PrintBoard(char[][] maze, HashSet<(int,int)> visiteds, int[] entrance)
-    {
-        var sb = new StringBuilder();
-        for (int i = 0; i < maze.Length; i++)
-        {
-            for (int j = 0; j < maze[i].Length; j++)
-            {
-                var cell = maze[i][j];
-                var c = cell switch
+                if (visited[i, j] || cell != rotten)
                 {
-                    var x when entrance[0] == i && entrance[1] == j => 'O',
-                    var x when visiteds.Contains((i, j)) => 'X',
-                    '+' => 'W',
-                    '.' => ' ',
-                    _ => ' ',
-                };
-                sb.AppendFormat("{0}", c);
+                    continue;
+                }
+
+                queue.Enqueue((i, j, 0));
+                rottenOranges++;
+                visited[i, j] = true;
+
+
             }
-            Console.WriteLine(sb.ToString());
-            sb.Clear();
         }
+
+        var duration = 0;
+
+        while (queue.TryDequeue(out var current))
+        {
+            var (x, y, second) = current;
+            var currentSpace = grid[x][y];
+            duration = second;
+            foreach (var direction in directions)
+            {
+                var newX = x + direction[0];
+                var newY = y + direction[1];
+
+                if (
+                    IsValidPosition(grid, newX, newY)
+                    && visited[newX, newY] is false
+                    && (currentSpace == rotten && grid[newX][newY] == fresh)
+                )
+                {
+                    rottenOranges++;
+                    grid[newX][newY] = 2;
+                    visited[newX, newY] = true;
+                    queue.Enqueue((newX, newY, second + 1));
+                }
+
+            }
+        }
+
+
+        return orangeCount > rottenOranges ? -1 : duration;
+    }
+    
+    private bool IsValidPosition(int[][] grid, int x, int y) => x >= 0 && x < grid.Length && y >= 0 && y < grid[x].Length;
+    #endregion
+    
+    #region Heap / Priority Queue
+    
+    public int FindKthLargest(int[] nums, int k)
+    {
+        var maxComparer = Comparer<int>.Create((a, b) => 0 - a.CompareTo(b));
+        var x = new PriorityQueue<int, int>(nums.Select(it => (it, it)), maxComparer);
+
+        var s = 0;
+        for (int i = 0; i < k; i++)
+        {
+            s = x.Dequeue();
+        }
+        return s;
+    }
+    
+    public class SmallestInfiniteSet
+    {
+
+        private PriorityQueue<int, int> Heap = new();
+        private HashSet<int> itensToRemove = new();
+
+        public SmallestInfiniteSet()
+        {
+            for (int i = 1; i <= 1000; i++)
+            {
+                Heap.Enqueue(i, i);
+            }
+        }
+
+        public int? PopSmallest()
+        {
+            var num = Heap.Dequeue();
+            itensToRemove.Add(num);
+            return num;
+        }
+
+        public void AddBack(int num)
+        {
+            var minUmber = Heap.Peek();
+            if (num < minUmber)
+            {
+                Heap.Enqueue(num, num);
+                itensToRemove.Remove(num);
+            }
+            else if (itensToRemove.Contains(num))
+            {
+                Heap.Enqueue(num, num);
+                itensToRemove.Remove(num);
+
+            }
+        }
+
+        //public long MaxScore(int[] nums1, int[] nums2, int k)
+        //{
+        //    var minHeap = new PriorityQueue<(int value, int index), int>(nums2.Select((it, i) => ((it, i), it)));
+
+        //    var mins = new List<(int max, int min, int index)>();
+        //    var times = k;
+        //    var pivot = 0;
+
+        //    while (times != 0 || minHeap.Count == 0)
+        //    {
+        //        var (min, index) = minHeap.Dequeue();
+        //        mins.Add((nums1[index], min, index));
+        //        nums1[index] = 0;
+
+        //        if (pivot != min)
+        //        {
+        //            pivot = min;
+        //            times--;
+        //        }
+        //    }
+
+        //    //pegar nums1 com mesmo index dos items mins
+        //    //pega o resto dos nums1 e cria um maxHeap com eles e pega k - 1
+        //    var maxHeap = new PriorityQueue<(int value, int index), int>(nums1.Select((it, i) => ((it, i), it)), Comparer<int>.Create((a, b) => 0 - a.CompareTo(b)));
+        //    var max = new List<int>();
+        //    for (int i = 0; i < k - 1; i++)
+        //    {
+        //        max.Add(maxHeap.Dequeue().value);
+        //    }
+
+        //    var maxSum = max.Sum();
+        //    foreach (var minValue in mins)
+        //    {
+        //        var x = (maxSum + minValue.max) * minValue.min;
+
+        //    }
+
+
+        //}
+    }
+    #endregion
+    
+    #region Binary Search
+    #endregion
+    
+    #region Backtracking
+    #endregion
+    
+    #region DP - 1D
+    #endregion
+    
+    #region DP - Multidimensional
+    #endregion
+    
+    #region Bit Manipulation
+    #endregion
+    
+    #region Trie
+    #endregion
+    
+    #region Intervals
+    #endregion
+    
+    #region Monotonic Stack
+    #endregion
+
+
+    public List<IList<int>> Subsets(int[] nums)
+    {
+        var subsets = new List<IList<int>>();
+
+        var current = new Stack<int>();
+
+        void DFS(int i)
+        {
+            if (i >= nums.Length)
+            {
+                subsets.Add(current.ToList());
+                return;
+            }
+
+            current.Push(nums[i]);
+            DFS(i + 1);
+
+            current.Pop();
+            DFS(i + 1);
+        }
+
+        DFS(0);
+        return subsets;
     }
 
-    public bool IsInsideBoundaries(char[][] maze, int x, int y) => (x >= 0 && x < maze.Length) && (y >= 0 && y < maze[0].Length);
-    public int CountSteps(Dictionary<(int x, int y), (int x, int y)> dict, (int x, int y) startPosition, (int x, int y) lastPosition, int step)
+    public List<List<int>> CombinationSum(int[] nums, int target)
     {
-        var nextPosition = dict[lastPosition];
-        if (nextPosition == startPosition)
+        var subsets = new List<List<int>>();
+        var current = new Stack<int>();
+
+        void DFS(int i, int sum)
         {
-            return step;
+
+            if (sum == target)
+            {
+                subsets.Add(current.ToList());
+                return;
+            }
+
+            if (i >= nums.Length || sum > target)
+                return;
+
+            current.Push(nums[i]);
+            DFS(i, sum + nums[i]);
+
+            current.Pop();
+            DFS(i + 1, sum);
         }
 
-        return CountSteps(dict, startPosition, nextPosition, step + 1);
+        DFS(0, 0);
+
+        return subsets;
+    }
+
+    public List<List<int>> Permute(int[] nums)
+    {
+        var permutations = new List<List<int>>();
+        var queue = new Queue<int>();
+        queue.Enqueue(0);
+        var stack = new List<int>();
+
+        while (queue.Count > 0)
+        {
+            var index = queue.Dequeue();
+            stack.Add(nums[index]);
+            if(stack.Count == nums.Length)
+            {
+                permutations.Add(stack.ToList());
+                stack.Clear();
+                continue;
+            }
+
+
+            var i = index - 1;
+            while(i > 0){
+                queue.Enqueue(i);
+                i--;
+            }
+
+            i = index + 1;
+            while(i < nums.Length){
+                queue.Enqueue(i);
+                i++;
+            }
+        }
+
+        return permutations;
     }
 
 }
