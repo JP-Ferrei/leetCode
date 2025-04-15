@@ -1,5 +1,5 @@
-﻿using System.Text;
-using neetcode.Leet75;
+﻿using neetcode.Leet75;
+using System.Text;
 
 namespace neetcode;
 public class LeetCode75
@@ -496,7 +496,7 @@ public class LeetCode75
                 dict1[c] += 1;
             }
         }
-        
+
         var dict2 = new Dictionary<char, int>();
         foreach (var c in word2)
         {
@@ -525,17 +525,17 @@ public class LeetCode75
         {
             return false;
         }
-        
+
         var order1 = dict1
             .OrderBy(it => it.Value)
-            .Select((pair, index)=>(pair, index))
+            .Select((pair, index) => (pair, index))
             .ToList();
-        
+
         var order2 = dict2
             .OrderBy(it => it.Value)
             .ToList();
 
-        return  order1.All(it => order2[it.index].Value == it.pair.Value);
+        return order1.All(it => order2[it.index].Value == it.pair.Value);
     }
 
     public int EqualPairs(int[][] grid)
@@ -699,12 +699,12 @@ public class LeetCode75
     public class RecentCounter
     {
         public Queue<int> Counter { get; init; }
-        
+
         public RecentCounter()
         {
             Counter = new Queue<int>();
         }
-    
+
         public int Ping(int t)
         {
             Counter.Enqueue(t);
@@ -721,11 +721,11 @@ public class LeetCode75
                     break;
                 }
             }
-            
+
             return Counter.Count;
         }
     }
-    
+
     public string PredictPartyVictory(string senate)
     {
         var queue = new Queue<char>();
@@ -1043,9 +1043,9 @@ public class LeetCode75
         return awnser;
     }
     #endregion
-    
+
     #region Binary Tree - BFS
-    
+
     public IList<int> RightSideView(TreeNode root)
     {
         var dict = new Dictionary<int, int>();
@@ -1092,7 +1092,7 @@ public class LeetCode75
 
     }
     #endregion
-    
+
     #region Binary Search Tree 
     public TreeNode SearchBST(TreeNode root, int val)
     {
@@ -1126,7 +1126,7 @@ public class LeetCode75
         }
 
         var direction = root.val > key ? root.left : root.right;
-        
+
         var node = DeleteNode(direction, key);
 
         if (node is null)
@@ -1134,14 +1134,14 @@ public class LeetCode75
             return null;
         }
 
-        DeleteNode(root, node,root.val > key);
+        DeleteNode(root, node, root.val > key);
 
         return root;
     }
 
     public void DeleteNode(TreeNode root, TreeNode nodeToDelete, bool isLeft)
     {
-    
+
         if (nodeToDelete is { left: null, right: null })
         {
             if (isLeft)
@@ -1149,10 +1149,10 @@ public class LeetCode75
                 root.left = null;
                 return;
             }
-            
+
             root.right = null;
         }
-        
+
         if (nodeToDelete is { left: null, right: not null })
         {
             if (isLeft)
@@ -1160,18 +1160,18 @@ public class LeetCode75
                 root.left = nodeToDelete.right;
                 return;
             }
-            
+
             root.right = nodeToDelete.right;
         }
-        
-        if (nodeToDelete is { left:not null, right: null })
+
+        if (nodeToDelete is { left: not null, right: null })
         {
             if (isLeft)
             {
                 root.left = nodeToDelete.left;
                 return;
             }
-            
+
             root.right = nodeToDelete.left;
         }
 
@@ -1179,7 +1179,7 @@ public class LeetCode75
     }
 
     #endregion
-    
+
     #region Graphs - DFS
     public bool CanVisitAllRooms(IList<IList<int>> rooms)
     {
@@ -1202,7 +1202,7 @@ public class LeetCode75
 
         return rooms.Count == keys.Count;
     }
-    
+
     public int FindCircleNum(int[][] isConnected)
     {
         var queue = new Queue<int[]>();
@@ -1235,7 +1235,7 @@ public class LeetCode75
 
         return provinces;
     }
-    
+
     class MinNode
     {
         public int Val { get; set; }
@@ -1301,14 +1301,14 @@ public class LeetCode75
     }
 
     #endregion
-    
+
     #region Graphs - BFS
-    
-    public int NearestExit(char[][] maze, int[] entrance)
-    {
-        var solution = new Leet75.Solution(maze);
-        return solution.NearestExit(entrance);
-    }
+
+    //public int NearestExit(char[][] maze, int[] entrance)
+    //{
+    //    var solution = new Leet75.Solution(maze);
+    //    return solution.NearestExit(entrance);
+    //}
 
     public int OrangesRotting(int[][] grid)
     {
@@ -1374,12 +1374,12 @@ public class LeetCode75
 
         return orangeCount > rottenOranges ? -1 : duration;
     }
-    
+
     private bool IsValidPosition(int[][] grid, int x, int y) => x >= 0 && x < grid.Length && y >= 0 && y < grid[x].Length;
     #endregion
-    
+
     #region Heap / Priority Queue
-    
+
     public int FindKthLargest(int[] nums, int k)
     {
         var maxComparer = Comparer<int>.Create((a, b) => 0 - a.CompareTo(b));
@@ -1392,7 +1392,7 @@ public class LeetCode75
         }
         return s;
     }
-    
+
     public class SmallestInfiniteSet
     {
 
@@ -1471,28 +1471,28 @@ public class LeetCode75
         //}
     }
     #endregion
-    
+
     #region Binary Search
     #endregion
-    
+
     #region Backtracking
     #endregion
-    
+
     #region DP - 1D
     #endregion
-    
+
     #region DP - Multidimensional
     #endregion
-    
+
     #region Bit Manipulation
     #endregion
-    
+
     #region Trie
     #endregion
-    
+
     #region Intervals
     #endregion
-    
+
     #region Monotonic Stack
     #endregion
 
@@ -1562,7 +1562,7 @@ public class LeetCode75
         {
             var index = queue.Dequeue();
             stack.Add(nums[index]);
-            if(stack.Count == nums.Length)
+            if (stack.Count == nums.Length)
             {
                 permutations.Add(stack.ToList());
                 stack.Clear();
@@ -1571,13 +1571,15 @@ public class LeetCode75
 
 
             var i = index - 1;
-            while(i > 0){
+            while (i > 0)
+            {
                 queue.Enqueue(i);
                 i--;
             }
 
             i = index + 1;
-            while(i < nums.Length){
+            while (i < nums.Length)
+            {
                 queue.Enqueue(i);
                 i++;
             }
